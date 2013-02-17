@@ -12,13 +12,10 @@ public class SimpleServerTest {
         try {
             HttpServer server = HttpServerFactory.create("http://meldanor.dyndns.org:8080/rest");
             server.start();
-            System.in.read();
-            JOptionPane.showMessageDialog(null, "Ende");
+            JOptionPane.showMessageDialog(null, "Stop server");
             server.stop(0);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
-
 }
