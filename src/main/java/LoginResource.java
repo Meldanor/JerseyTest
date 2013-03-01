@@ -22,7 +22,6 @@ public class LoginResource {
 
     static {
         keys = new HashMap<String, String>();
-
         keys.put("dpf43f3p2l4k3l03", "kd94hf93k423kf44");
     }
 
@@ -41,7 +40,8 @@ public class LoginResource {
         if (consumerKey == null)
             return Boolean.FALSE.toString();
 
-        // Genereate the secret by using the consumer key and the consumer secret
+        // Genereate the secret by using the consumer key and the consumer
+        // secret
         OAuthSecrets secrets = new OAuthSecrets().consumerSecret(consumerKey);
         consumerKey = null;
         System.gc();
