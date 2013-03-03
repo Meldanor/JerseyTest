@@ -8,8 +8,11 @@ import org.apache.commons.codec.binary.Hex;
 import org.junit.Test;
 
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.ClientFilter;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.net.httpserver.HttpServer;
 
@@ -49,11 +52,11 @@ public class AccountTests {
             e.printStackTrace();
         }
         server.start();
-        
+
         // Create client
         String base = "http://localhost:8080/rest/account";
         Client client = Client.create();
-        
+
         // Create new account
         WebResource create = client.resource(base + "/create");
         ClientResponse response = create.path("Mario").path(Hex.encodeHexString("Mamamia123".getBytes())).put(ClientResponse.class);
@@ -63,11 +66,71 @@ public class AccountTests {
         WebResource verify = client.resource(base + "/verify");
         response = verify.path("Mario").path(Hex.encodeHexString("Mamamia123".getBytes())).get(ClientResponse.class);
         System.out.println("Login with correct values: " + response.getClientResponseStatus());
-        
+
         // Login with the account(wrong values)
         response = verify.path("Mario").path(Hex.encodeHexString("mamamia123".getBytes())).get(ClientResponse.class);
         System.out.println("Login with wrong values: " + response.getClientResponseStatus());
         server.stop(0);
+    }
+
+    @Test
+    public void filterRESTAPI() {
+        // Start Server
+        HttpServer server = null;
+        try {
+            server = HttpServerFactory.create("http://meldanor.dyndns.org:8080/rest");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        server.start();
+
+        String base = "http://localhost:8080/rest/account";
+        Client client = Client.create();
+
+        // Create new account
+        WebResource create = client.resource(base + "/create");
+        ClientResponse response = create.path("Mario").path(Hex.encodeHexString("Mamamia123".getBytes())).put(ClientResponse.class);
+        System.out.println("Create Account: " + response.getClientResponseStatus());
+
+        // Login with the account(correct values)
+        WebResource verify = client.resource(base + "/verifyfilter");
+        // Create a filter which will always add user information for
+        // authentification to the query
+        client.addFilter(new TestFilter("Mario", "Mamamia123"));
+        response = verify.get(ClientResponse.class);
+        System.out.println("Login with filter: " + response.getClientResponseStatus());
+    }
+
+    // Filter which will always add user information to every webresource access
+    public static final class TestFilter extends ClientFilter {
+
+        private final String userName;
+        private final String password;
+
+        public final static String USER_FIELD = "User";
+        public final static String PASSWORD_FIELD = "Password";
+
+        public TestFilter(String userName, byte[] password) {
+            this.userName = userName;
+            this.password = Hex.encodeHexString(password);
+        }
+
+        public TestFilter(String userName, String password) {
+            this(userName, password.getBytes());
+        }
+
+        @Override
+        public ClientResponse handle(final ClientRequest cr) throws ClientHandlerException {
+
+            // Add User and Password Header
+            if (!cr.getHeaders().containsKey(USER_FIELD) && !cr.getHeaders().containsKey(PASSWORD_FIELD)) {
+                cr.getHeaders().add(USER_FIELD, userName);
+                cr.getHeaders().add(PASSWORD_FIELD, password);
+            }
+
+            return getNext().handle(cr);
+        }
     }
 
 }
