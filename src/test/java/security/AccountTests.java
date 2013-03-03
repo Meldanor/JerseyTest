@@ -8,11 +8,9 @@ import org.apache.commons.codec.binary.Hex;
 import org.junit.Test;
 
 import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientHandlerException;
-import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.ClientFilter;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.net.httpserver.HttpServer;
 
@@ -41,7 +39,7 @@ public class AccountTests {
         System.out.println(" OK");
     }
 
-    @Test
+//    @Test
     public void RESTAPI() {
         // Start Server
         HttpServer server = null;
@@ -97,40 +95,10 @@ public class AccountTests {
         WebResource verify = client.resource(base + "/verifyfilter");
         // Create a filter which will always add user information for
         // authentification to the query
-        client.addFilter(new TestFilter("Mario", "Mamamia123"));
+        client.addFilter(new HTTPBasicAuthFilter("Mario", Hex.encodeHexString("Mamamia123".getBytes())));
         response = verify.get(ClientResponse.class);
         System.out.println("Login with filter: " + response.getClientResponseStatus());
+
+        server.stop(0);
     }
-
-    // Filter which will always add user information to every webresource access
-    public static final class TestFilter extends ClientFilter {
-
-        private final String userName;
-        private final String password;
-
-        public final static String USER_FIELD = "User";
-        public final static String PASSWORD_FIELD = "Password";
-
-        public TestFilter(String userName, byte[] password) {
-            this.userName = userName;
-            this.password = Hex.encodeHexString(password);
-        }
-
-        public TestFilter(String userName, String password) {
-            this(userName, password.getBytes());
-        }
-
-        @Override
-        public ClientResponse handle(final ClientRequest cr) throws ClientHandlerException {
-
-            // Add User and Password Header
-            if (!cr.getHeaders().containsKey(USER_FIELD) && !cr.getHeaders().containsKey(PASSWORD_FIELD)) {
-                cr.getHeaders().add(USER_FIELD, userName);
-                cr.getHeaders().add(PASSWORD_FIELD, password);
-            }
-
-            return getNext().handle(cr);
-        }
-    }
-
 }

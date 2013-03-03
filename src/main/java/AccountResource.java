@@ -4,7 +4,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -39,10 +38,9 @@ public class AccountResource {
     @Path("/verifyfilter")
     public Response verifyfilter(@Context HttpHeaders headers) {
 
-        MultivaluedMap<String, String> h = headers.getRequestHeaders();
         AccountManager aManager = AccountManager.getInstance();
 
-        if (aManager.validateUser(h.getFirst("User"), h.getFirst("Password")))
+        if (aManager.validateUser(headers))
             return Response.ok().build();
         else
             return Response.status(Status.UNAUTHORIZED).build();

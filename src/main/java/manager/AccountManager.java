@@ -8,8 +8,12 @@ import java.util.Map;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.codec.binary.Hex;
+
+import com.sun.jersey.core.util.Base64;
 
 public class AccountManager {
 
@@ -81,6 +85,32 @@ public class AccountManager {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public boolean validateUser(HttpHeaders headers) {
+        MultivaluedMap<String, String> headMap = headers.getRequestHeaders();
+        // extract Value behind Authorization head from request
+        String base64String = headMap.getFirst(HttpHeaders.AUTHORIZATION);
+        // Not authorization head in the request
+        if (base64String == null)
+            return false;
+        // decode base64 string
+        base64String = base64String.substring("Basic ".length());
+        System.out.println(base64String);
+        base64String = Base64.base64Decode(base64String);
+        System.out.println(base64String);
+        // Split at ':' as defined for HTTPBasicAuthentification
+        int pos = base64String.indexOf(':');
+        // Not found
+        if (pos == -1)
+            return false;
+        // extract values
+        String username = base64String.substring(0, pos);
+        String password = base64String.substring(pos + 1);
+
+        System.out.println(username);
+        System.out.println(password);
+        return validateUser(username, password);
     }
 
     public boolean validateUser(String username, String password) {
