@@ -5,6 +5,8 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -12,6 +14,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.codec.binary.Hex;
+
+import security.Token;
 
 import com.sun.jersey.core.util.Base64;
 
@@ -26,10 +30,13 @@ public class AccountManager {
         return INSTANCE;
     }
 
+    // Placeholder for database
     private Map<String, SaltedPassword> userMap;
 
     private AccountManager() {
         this.userMap = new HashMap<String, SaltedPassword>();
+        this.tokenByUserMap = new HashMap<String, Token>();
+        this.tokenByIDMap = new HashMap<String, Token>();
     }
 
     public static final class SaltedPassword {
@@ -95,10 +102,11 @@ public class AccountManager {
         if (base64String == null)
             return false;
         // decode base64 string
+//        System.out.println(base64String);
         base64String = base64String.substring("Basic ".length());
-        System.out.println(base64String);
+//        System.out.println(base64String);
         base64String = Base64.base64Decode(base64String);
-        System.out.println(base64String);
+//        System.out.println(base64String);
         // Split at ':' as defined for HTTPBasicAuthentification
         int pos = base64String.indexOf(':');
         // Not found
@@ -108,9 +116,22 @@ public class AccountManager {
         String username = base64String.substring(0, pos);
         String password = base64String.substring(pos + 1);
 
-        System.out.println(username);
-        System.out.println(password);
+//        System.out.println(username);
+//        System.out.println(password);
         return validateUser(username, password);
+    }
+
+    public String extractUser(HttpHeaders header) {
+        // TODO: All conversion shit to another utility class
+        String base64String = header.getRequestHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        // ERROR
+        if (base64String == null)
+            return null;
+        base64String = base64String.substring("Basic ".length());
+        base64String = Base64.base64Decode(base64String);
+
+        String user = base64String.substring(0, base64String.indexOf(':'));
+        return user;
     }
 
     public boolean validateUser(String username, String password) {
@@ -149,4 +170,38 @@ public class AccountManager {
         return new SaltedPassword(saltedHash, saltString, iterations);
     }
 
+    // ************
+    // ** TOKENS **
+    // ************
+
+    // Token Map
+    private Map<String, Token> tokenByUserMap;
+    private Map<String, Token> tokenByIDMap;
+
+    private final static long TOKEN_EXPIRATION = TimeUnit.HOURS.toMillis(1L);
+
+    public Token generateToken(String username) {
+
+        // Generate random uudids
+        UUID tokenID = UUID.randomUUID();
+        UUID tokenSecret = UUID.randomUUID();
+        
+        // generate token
+        Token token = new Token(username, tokenID.toString(), tokenSecret.toString(), TOKEN_EXPIRATION);
+        this.tokenByUserMap.put(username.toLowerCase(), token);
+        this.tokenByIDMap.put(token.getKey(), token);
+        return token;
+    }
+
+    public Token removeToken(String username) {
+        return this.tokenByUserMap.remove(username.toLowerCase());
+    }
+
+    public Token getTokenByUser(String username) {
+        return tokenByUserMap.get(username.toLowerCase());
+    }
+
+    public Token getTokenByID(String tokenId) {
+        return tokenByIDMap.get(tokenId);
+    }
 }
