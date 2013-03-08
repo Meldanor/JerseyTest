@@ -8,7 +8,7 @@ public class MessageResource {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String message2() {
+    public String message() {
         return "Yeah!";
     }
 }

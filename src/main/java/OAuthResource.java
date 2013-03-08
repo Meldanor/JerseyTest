@@ -14,8 +14,8 @@ import com.sun.jersey.oauth.signature.OAuthSecrets;
 import com.sun.jersey.oauth.signature.OAuthSignature;
 import com.sun.jersey.oauth.signature.OAuthSignatureException;
 
-@Path("/login")
-public class LoginResource {
+@Path("/oauth")
+public class OAuthResource {
 
     // Test values
     private static Map<String, String> keys;

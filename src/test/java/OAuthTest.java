@@ -5,12 +5,14 @@ import org.junit.Test;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.jersey.oauth.client.OAuthClientFilter;
 import com.sun.jersey.oauth.signature.HMAC_SHA1;
 import com.sun.jersey.oauth.signature.OAuthParameters;
 import com.sun.jersey.oauth.signature.OAuthSecrets;
+import com.sun.net.httpserver.HttpServer;
 
-public class SecurityClient {
+public class OAuthTest {
 
     @Test
     public void authentificate() {
@@ -25,6 +27,16 @@ public class SecurityClient {
     public boolean login(String userName, String password) {
         String base = "http://localhost:8080/rest";
 
+        // Start http server
+        HttpServer server = null;
+        try {
+            server = HttpServerFactory.create(base);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        server.start();
+
         Client client = Client.create();
 
         // Create parameter for authentification - the user name and using HMAC
@@ -38,10 +50,12 @@ public class SecurityClient {
         OAuthClientFilter filter = new OAuthClientFilter(client.getProviders(), params, secrets);
 
         // Try to login
-        WebResource resource = client.resource(base + "/login");
+        WebResource resource = client.resource(base + "/oauth");
         resource.addFilter(filter);
 
         String response = resource.get(String.class);
+
+        server.stop(0);
         return Boolean.parseBoolean(response);
     }
 }
