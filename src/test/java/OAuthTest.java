@@ -56,6 +56,7 @@ public class OAuthTest {
         String response = resource.get(String.class);
 
         server.stop(0);
+        
         return Boolean.parseBoolean(response);
     }
 }
