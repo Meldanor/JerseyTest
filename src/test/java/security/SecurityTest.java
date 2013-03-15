@@ -9,6 +9,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import security.filter.LoginFilter;
+import security.filter.TokenFilter;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -33,6 +34,7 @@ public class SecurityTest {
         System.out.println("Add one test account");
         AccountManager aManager = AccountManager.getInstance();
         aManager.addUser("kilian", DigestUtils.sha512Hex("password"));
+
     }
 
     @AfterClass
@@ -45,14 +47,16 @@ public class SecurityTest {
     public void test() {
         // Create REST client
         Client client = Client.create();
+        
         WebResource tokenRes = client.resource(BASE_URL + "/account/recToken");
         // add a filter using the user and password to the resource
         tokenRes.addFilter(new LoginFilter("kilian", "password"));
 
         // access the resource and get the generated token
+
         Token token = tokenRes.get(Token.class);
         System.out.println(token);
-
+        client.addFilter(new TokenFilter(token));
         // Test with wrong values
         try {
             tokenRes.removeAllFilters();
