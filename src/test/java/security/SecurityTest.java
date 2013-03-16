@@ -69,6 +69,8 @@ public class SecurityTest {
             if (!e.getMessage().equals("GET http://localhost:8080/rest/account/recToken returned a response status of 401 Unauthorized"))
                 fail();
         }
+        
+        System.out.println("Jenkins Test mit GeMo!");
 
     }
 }
