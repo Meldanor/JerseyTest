@@ -26,6 +26,7 @@ public class AccountTests {
         assertTrue(aManager.addUser("Luigi", Hex.encodeHexString("1q2w3e4r".getBytes())));
         assertTrue(aManager.addUser("Markus", Hex.encodeHexString("1q2w3e4r".getBytes())));
         System.out.println("Accounts added");
+        
     }
 
     @Test
