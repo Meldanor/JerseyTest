@@ -44,10 +44,5 @@
   		<artifactId>junit</artifactId>
   		<version>4.11</version>
   	</dependency>
-  	<dependency>
-  		<groupId>de.minestar</groupId>
-  		<artifactId>minestarlibrary</artifactId>
-  		<version>1.4.3</version>
-  	</dependency>
   </dependencies>
 </project>
