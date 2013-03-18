@@ -52,18 +52,11 @@
 			<name>Internal Releases</name>
 			<url>http://meldanor.dyndns.org:8081/nexus/content/repositories/releases</url>
 		</repository>
+		<snapshotRepository>
+			<id>deploymentRepo</id>
+			<name>Internal Releases</name>
+			<url>http://meldanor.dyndns.org:8081/nexus/content/repositories/snapshots</url>
+		</snapshotRepository>
 	</distributionManagement>
 
-	<repositories>
-		<repository>
-			<id>deploymentRepoReleases</id>
-			<name>Releases (Nexus)</name>
-			<url>http://meldanor.dyndns.org:8081/nexus/content/repositories/releases/</url>
-		</repository>
-		<repository>
-			<id>deploymentRepoSnapshots</id>
-			<name>Snapshots (Nexus)</name>
-			<url>http://meldanor.dyndns.org:8081/nexus/content/repositories/snapshots/</url>
-		</repository>
-	</repositories>
 </project>
